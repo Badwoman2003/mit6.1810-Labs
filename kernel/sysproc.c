@@ -12,7 +12,7 @@ sys_exit(void)
   int n;
   argint(0, &n);
   exit(n);
-  return 0;  // not reached
+  return 0; // not reached
 }
 
 uint64
@@ -43,7 +43,7 @@ sys_sbrk(void)
 
   argint(0, &n);
   addr = myproc()->sz;
-  if(growproc(n) < 0)
+  if (growproc(n) < 0)
     return -1;
   return addr;
 }
@@ -55,12 +55,14 @@ sys_sleep(void)
   uint ticks0;
 
   argint(0, &n);
-  if(n < 0)
+  if (n < 0)
     n = 0;
   acquire(&tickslock);
   ticks0 = ticks;
-  while(ticks - ticks0 < n){
-    if(killed(myproc())){
+  while (ticks - ticks0 < n)
+  {
+    if (killed(myproc()))
+    {
       release(&tickslock);
       return -1;
     }
@@ -90,4 +92,35 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+// after n ticks return function address
+uint64
+sys_sigalarm(void)
+{
+  struct proc *p = myproc();
+  argint(0, &p->ticks);              // first arg:ticks
+  argaddr(1, (uint64 *)&p->handler); // second arg:adress
+  p->ticks_count = 0;                // init:make count = 0
+  if ((!p->ticks) && (!p->handler))
+  {
+    p->ticks = -1; // unusual situation:sigalarm(0,0)
+  }
+  return 0;
+}
+
+// return from sigalarm
+uint64
+sys_sigreturn(void)
+{
+  struct proc *p = myproc();
+  p->trapframe->epc = p->epc; //the expcetion address before sigalarm
+  p->trapframe->ra = p->ra;
+  p->trapframe->sp = p->sp;
+  p->trapframe->s0 = p->s0;
+  p->trapframe->a1 = p->a1;
+  p->proc_flag = 0;
+  return p->a0; // When a signal is handled, the system call return value is stored in p->trapframe->a0.
+              // p->a0 temporarily holds this value so that it can be returned to the user process
+              // after the signal handler finishes and the original state is restored.
 }

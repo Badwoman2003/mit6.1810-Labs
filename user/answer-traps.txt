@@ -1,0 +1,9 @@
+1.a0,a1,a2 include params
+2.in function int f(x),the complier makes function g(x) inline,in function main(),the result parse to a2 directly
+3.as the code below
+    30:	00000097          	auipc	ra,0x0
+    34:	612080e7          	jalr	1554(ra) # 642 <printf>
+it seems that 30 → ra and 1554 + (ra) which turns to 0x642,the address of function printf()
+4.it's jalr instruct,ra stores pc + 4 = 0x38
+5.
+6.a random value 'cause there's no param in register a1
