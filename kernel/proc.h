@@ -119,7 +119,7 @@ struct proc
 
   // these are needed to sigalarm
   int ticks;
-  void *handler;
+  void (*handler)();  //it's a function pointer
   int ticks_count;
   int proc_flag;
   uint64 epc;
