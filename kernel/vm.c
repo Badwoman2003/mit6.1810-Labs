@@ -348,6 +348,8 @@ int uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
     }
 
     acquire(&lock_counting.lock);
+    lock_counting.counting[pa/PGSIZE]++;
+    release(&lock_counting);
   }
   return 0;
 
