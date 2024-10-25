@@ -70,11 +70,13 @@ sys_sleep(void)
   return 0;
 }
 
+//#ifdef LAB_PGTBL
 int sys_pgaccess(void)
 {
   // lab pgtbl: your code here.
   uint64 st;
   argaddr(0, &st);
+  uint64 res_addr;
   char *buf = (char *)st;
   int len = 0;
   argint(1, &len);
@@ -82,24 +84,23 @@ int sys_pgaccess(void)
   {
     len = 32;
   }
-  unsigned int abits = 0;
+  uint64 abits = 0;
   for (int i = 0; i < len; i++)
   {
     pte_t *pte = walk(myproc()->pagetable, (uint64)buf + PGSIZE * i, 0);
     if (*pte & PTE_A)
     {
       *pte &= ~PTE_A;
-      abits |= (1 << i);
+      abits |= (1L << i);
     }
   }
-  argaddr(2, &st);
-  if (copyout(myproc()->pagetable, st, (char *)&abits, sizeof(abits)) < 0)
-  {
-    return -1;
-  }
+  argaddr(2, &res_addr);
+  printf("%p",abits);
+  copyout(myproc()->pagetable, res_addr, (char *)&abits, sizeof(abits));
 
   return 0;
 }
+//#endif
 
 uint64
 sys_kill(void)
